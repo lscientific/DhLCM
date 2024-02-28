@@ -1,0 +1,17 @@
+Package: DhLCM
+Type: Package
+Title: Degree-heterogeneous Latent Class Model
+Version: 0.0.1.0
+Authors@R: Zhongyuan Lyu, Ling Chen, Yuqi Gu
+Maintainer: Ling Chen <lc3521@columbia.edu>
+Description: The R package used in the manuscript 'Degree-heterogeneous Latent Class Analysis for High-dimensional Discrete Data'.
+License: 
+Encoding: UTF-8
+Depends: R
+Imports: 
+	RSpectra,
+	stats,
+	Rdpack
+RdMacros: Rdpack
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
