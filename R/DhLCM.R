@@ -87,7 +87,7 @@ DhLCM <- function(R, K, spectral='heteroPCA', norm='L2', dist='Bernoulli', T0=20
   if (norm == 'SCORE') {
     U_bar <- t(apply(U, 1, function(u) u / u[1]))
     U_bar <- U_bar[, 2:ncol(U_bar)]
-    if (N <= 300) {
+    if (N <= 200) {
       t <- 2 * log(N)
     } else {
       t <- log(N)
