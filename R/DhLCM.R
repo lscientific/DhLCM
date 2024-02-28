@@ -40,8 +40,8 @@ heteroPCA <- function(R, K, T0) {
 #'
 #' This function performs k-means clustering on the top \code{K} eigenvectors/left singular vectors, and estimates the DhLCM model parameters
 #'
-#' @param R Numeric matrix. 
-#' @param K Positive integer. The number of top eigen vectors to be extracted.
+#' @param R Numeric matrix. Data matrix.
+#' @param K Positive integer. The number of top eigenvectors/left singular vectors to be extracted.
 #' @param spectral Character. One of \code{"heteroPCA"} and \code{"SVD"}. 
 #'        Specifies the method to be used to obtain the top \code{K} eigenvectors/left singular vectors. 
 #'        \code{"heteroPCA"} implements the heteroPCA method. 
