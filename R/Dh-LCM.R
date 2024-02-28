@@ -32,7 +32,7 @@ heteroPCA <- function(R, K, T0) {
 
 #' Degree-heterogeneous latent class model estimation
 #'
-#' This function performs k-means clustering on the top \code{K} eigenvectors returned by heteroPCA, and estimates the DhLCM model parameters
+#' This function performs k-means clustering on the top \code{K} eigenvectors/left singular vectors, and estimates the DhLCM model parameters
 #'
 #' @param R Numeric matrix. 
 #' @param K Positive integer. The number of top eigen vectors to be extracted.
