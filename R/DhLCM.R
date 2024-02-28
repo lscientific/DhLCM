@@ -10,6 +10,9 @@ H_mat <- function(X) {
   return(X)
 }
 
+
+
+
 #' HeteroPCA implementation
 #'
 #' This function implements the HeteroPCA algorithm
@@ -29,6 +32,9 @@ heteroPCA <- function(R, K, T0) {
   U_hat <- RSpectra::svds(M, K)$u
   return(U_hat)
 }
+
+
+
 
 #' Degree-heterogeneous latent class model estimation
 #'
