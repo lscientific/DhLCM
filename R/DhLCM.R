@@ -1,3 +1,8 @@
+library(RSpectra) # for fast SVD
+library(RcppHungarian) # for optimal label permutation
+
+
+
 #' Diagonal deletion
 #'
 #' This function takes in a matrix, and returns the diagonal-deleted matrix
@@ -24,12 +29,19 @@ H_mat <- function(X) {
 #' @export
 heteroPCA <- function(R, K, T0) {
   M <- H_mat(R %*% t(R))
-  for (t in 1:T0) {
-    svd_res <- RSpectra::svds(M, K)
-    M_bar <- svd_res$u %*% diag(svd_res$d[1:K]) %*% t(svd_res$v)
-    M <- H_mat(M) + diag(diag(M_bar))
+  M_no_diag <- M
+  if (T0 > 0) {
+    for (t in 1:T0) {
+      svd_res <- svds(M, K)
+      if (K == 1) {
+        M_bar <- svd_res$u %*% t(svd_res$v) * svd_res$d
+      } else {
+        M_bar <- svd_res$u %*% diag(svd_res$d[1:K]) %*% t(svd_res$v)
+      }
+      M <- M_no_diag + diag(diag(M_bar))
+    }
   }
-  U_hat <- RSpectra::svds(M, K)$u
+  U_hat <- svds(M, K)$u
   return(U_hat)
 }
 
@@ -67,69 +79,109 @@ heteroPCA <- function(R, K, T0) {
 #' \item \code{sigma2_hat} --- Numeric vector (>=0). Asymptotic variance for each element of \code{T_hat}.
 #' }
 #' @export
-DhLCM <- function(R, K, spectral='heteroPCA', norm='L2', dist='Bernoulli', T0=20, nstart=10) { 
+DhLCM <- function(R, K, spectral='heteroPCA', norm='L2', dist='Bern', 
+                  T0=20, nstart=10, S0=NULL, clustering_only=F) { 
   N <- nrow(R)
   J <- ncol(R)
-  U <- heteroPCA(R, K, T0)
+  
+  if (spectral == 'heteroPCA') {
+    U <- heteroPCA(R, K, T0)
+  } else if (spectral == 'SVD') {
+    U <- svds(R, k=K)$u
+  } else {
+    stop("Error: spectral needs to be 'heteroPCA' or 'SVD'")
+  }
   
   # k-means clustering
-  if (norm == 'NA') {
-    kmeans_res <- stats::kmeans(U, centers=K, iter.max=100, nstart=nstart)
-  } 
-  if (norm == 'L2') {
-    U_bar <- t(apply(U, 1, function(u) u / sqrt(sum(u^2))))
-    kmeans_res <- stats::kmeans(U_bar, centers=K, iter.max=100, nstart=nstart)
-  } 
-  if (norm == 'L1') {
-    U_bar <- t(apply(U, 1, function(u) u / sum(abs(u))))
-    kmeans_res <- stats::kmeans(U_bar, centers=K, iter.max=100, nstart=nstart)
-  } 
-  if (norm == 'SCORE') {
-    U_bar <- t(apply(U, 1, function(u) u / u[1]))
-    U_bar <- U_bar[, 2:ncol(U_bar)]
-    if (N <= 200) {
-      t <- 2 * log(N)
+  if (is.null(norm)) {
+    kmeans_res <- kmeans(U, centers=K, iter.max=100, nstart=nstart)
+  } else if (norm == 'L2') {
+      U_bar <- t(apply(U, 1, function(u) u / sqrt(sum(u^2))))
+      kmeans_res <- kmeans(U_bar, centers=K, iter.max=100, nstart=nstart)
+    } else if (norm == 'L1') {
+      U_bar <- t(apply(U, 1, function(u) u / sum(abs(u))))
+      kmeans_res <- kmeans(U_bar, centers=K, iter.max=100, nstart=nstart)
+    } else if (norm == 'SCORE') {
+      U_bar <- t(apply(U, 1, function(u) u / u[1]))
+      U_bar <- U_bar[, 2:ncol(U_bar)]
+      if (N <= 300) {
+        t <- 2 * log(N)
+      } else {
+        t <- log(N)
+      }
+      U_bar <- ifelse(abs(U_bar) < t, U_bar, t)
+      kmeans_res <- kmeans(U_bar, centers=K, iter.max=100, nstart=nstart)
     } else {
-      t <- log(N)
+      stop("Error: norm needs to be one of NULL, 'L2', 'L1', 'SCORE'")
     }
-    U_bar <- ifelse(abs(U_bar) < t, U_bar, t)
-    kmeans_res <- stats::kmeans(U_bar, centers=K, iter.max=100, nstart=nstart)
-  }
   S_hat <- kmeans_res$cluster
   centers <- kmeans_res$centers
   
-  # parameter estimation
+  # find the optimal permutation if S0 is available
+  if (!is.null(S0)) {
+    if (length(S0) != N) {
+      stop("Error: The length of S0 is not equal to N.")
+    }
+    
+    count1 <- table(S_hat)
+    count2 <- table(S0)
+    mat <- matrix(0, K, K)
+    for (i in 1:K) {
+      for (j in 1:K) {
+        mat[i, j] <- sum((S_hat == i) & (S0 == j))
+      }
+    }
+    perm_mat <- HungarianSolver(-mat)$pairs[, 2]
+    S_hat <- perm(S_hat, perm_mat, K)
+    centers <- centers[sort(perm_mat, index.return=T)$ix, ] 
+  }
+  
+  # estimation
   T_hat = sigma2_hat = Z_hat <- NULL
-  Z_hat <- matrix(0, N, K)
-  for (i in 1:N) {
-    Z_hat[i, S_hat[i]] <- 1
-  }
-  C_hat <- table(S_hat)
-  Omega_hat <- apply(U, 1, function(u) sqrt(sum(u^2))) * sapply(S_hat, function(s) sqrt(C_hat[[s]]))
-  T_hat <- t(solve(t(Z_hat) %*% Z_hat) %*% t(Z_hat) %*% diag(1 / Omega_hat) %*% R)
-  T_hat <- ifelse(T_hat > 1, 1, T_hat)
-  T_hat <- ifelse(T_hat < 0, 0, T_hat)
-  
-  # asymptotic variance 
-  if ((dist == "Bernoulli") | (dist == "Binomial")) {
-    sigma2_hat <- matrix(NA, J, K)
-    for(j in 1:J) {
-      for(k in 1:K) {
-        w_k <- Omega_hat[S_hat == k]
-        sigma2_hat[j, k] <- T_hat[j, k] * sum((1 - w_k * T_hat[j, k]) / w_k) / C_hat[[k]]^2 
+  if (!clustering_only) {
+    Z_hat <- matrix(0, N, K)
+    for (i in 1:N) {
+      Z_hat[i, S_hat[i]] <- 1
+    }
+    
+    C_hat <- table(S_hat)
+    Omega_hat <- apply(U, 1, function(u) sqrt(sum(u^2))) * sapply(S_hat, function(s) sqrt(C_hat[[s]]))
+    T_hat <- t(solve(t(Z_hat) %*% Z_hat) %*% t(Z_hat) %*% diag(1 / Omega_hat) %*% R)
+    T_hat <- ifelse(T_hat > 1, 1, T_hat)
+    T_hat <- ifelse(T_hat < 0, 0, T_hat)
+    
+    if ((dist == "Bern") | (dist == "Binom")) {
+      sigma2_hat <- matrix(NA, J, K)
+      for(j in 1:J) {
+        for(k in 1:K) {
+          w_k <- Omega_hat[S_hat == k]
+          sigma2_hat[j, k] <- T_hat[j, k] * sum((1 - w_k * T_hat[j, k]) / w_k) / C_hat[[k]]^2 
+        }
       }
+    } else if (dist == "Pois") {
+      sigma2_hat <- matrix(NA, J, K)
+      for(j in 1:J) {
+        for(k in 1:K) {
+          w_k <- Omega_hat[S_hat == k]
+          sigma2_hat[j, k] <- T_hat[j, k] * sum(1 / w_k)/ C_hat[[k]]^2
+        }
+      }
+    } else {
+      stop("Error: dist needs to be 'Bern' or 'Binom' or 'Pois'")
     }
   }
-  if (dist == "Poisson") {
-    sigma2_hat <- matrix(NA, J, K)
-    for(j in 1:J) {
-      for(k in 1:K) {
-        w_k <- Omega_hat[S_hat == k]
-        sigma2_hat[j, k] <- T_hat[j, k] * sum(1 / w_k)/ C_hat[[k]]^2
-      }
-    }
-  }
   
-  return(list(T_hat=T_hat, S_hat=S_hat, Z_hat=Z_hat, sigma2_hat=sigma2_hat))
+  return(list(U=U, T_hat=T_hat, sigma2_hat=sigma2_hat, 
+              S_hat=S_hat, Z_hat=Z_hat, centers=centers))
 }
 
+
+perm <- function(x, p, K) {
+  x_perm <- rep(NA, length(x))
+  for (i in 1:length(x)) {
+    for (k in 1:K) {
+      x_perm[x == k] <- p[k]
+    }
+  }
+  return(x_perm)
+}
