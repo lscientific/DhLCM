@@ -11,6 +11,7 @@ Load the R package by running
 
 ## Simulation experiments
 - Simulation code is located in `inst/simulation`
+- Each file corresponds to a part of simulation experiments, and can be run individually.
 >- `clustering.R` generates Figure 2
 >- `hypothesis_testing.R` generates Figure 4, Figure S.3, Table 1
 >- `svd_hetero_compare.R` generates Figure 3, Figure S.5
