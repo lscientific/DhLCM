@@ -27,4 +27,4 @@ The three pre-processed real datasets used in our analysis can be downloaded fro
 - The pipeline for real data analysis in the paper is located at `inst/real_data`
 >- `senate.R` corresponds to Section 6.1. It generates Figure 1, Figure S.9, Table 3
 >- `hapmap.R` corresponds to Section 6.2. It generates Figure 1, Figure S.7, Table 3
->- `atac_celxgene.R` corresponds to Section 6.3. It generates Figure 1, Figure S.8, Table 3.
+>- `atac_celxgene.R` corresponds to Section 6.3. It generates Figure 1, Figure S.8, Table 3
