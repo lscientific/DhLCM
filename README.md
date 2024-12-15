@@ -9,5 +9,19 @@ Load the R package by running
 - ```heteroPCA```: this function performs the HeteroPCA algorithm proposed in [Zhang et al., 2015](https://arxiv.org/abs/1810.08316).
 - ```DhLCM```: this function performs kmeans clustering on the top ```K``` eigenvectors/left singular vectors of the data matrix, and estimates the DhLCM model parameters.
 
+## Simulation experiments
+- Simulation code is located in `inst/simulation`
+>- `clustering.R` generates Figure 2
+>- `hypothesis_testing.R` generates Figure 4, Figure S.3, Table 1
+>- `svd_hetero_compare.R` generates Figure 3, Figure S.5
+>- `MLE.R` generates Figure S.1, Figure S.2
+>- `assumption3.R` generates Figure S.6
+>- `condition_number.R` generates Table S.1
+
+
 ## Three real datasets
-The three real datasets used in our analysis can be found in [https://figshare.com/s/9b4d5964af498d167e85].
+The three pre-processed real datasets used in our analysis can be downloaded from [https://figshare.com/s/9b4d5964af498d167e85]. The raw data can be accessed from [https://legacy.voteview.com/senate112.htm], [https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3], and [https://cellxgene.cziscience.com/collections/d36ca85c-3e8b-444c-ba3e-a645040c6185]
+- The pipeline for real data analysis in the manuscript is located at `inst/real_data`
+>- `senate.R` corresponds to Section 6.1. It generates Figure 1, Figure S.9, Table 3
+>- `hapmap.R` corresponds to Section 6.2. It generates Figure 1, Figure S.7, Table 3
+>- `atac_celxgene.R` corresponds to Section 6.3. It generates Figure 1, Figure S.8, Table 3.

@@ -95,3 +95,4 @@ ggplot(df_res, aes(x = J, y = Freq, fill=Perturbation)) + geom_boxplot() +
   scale_fill_manual(values=c("#bae1e8", '#e26b57'))
 
 ggsave("inst/extdata/simulation_figures/assumption3_bern.png", width = 5, height=3.5)
+# this figure corresponds to Figure S.6 in the Supplementary Material
