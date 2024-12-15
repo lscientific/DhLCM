@@ -1,8 +1,6 @@
 library(RSpectra) # for fast SVD
 library(RcppHungarian) # for optimal label permutation
 
-
-
 #' Diagonal deletion
 #'
 #' This function takes in a matrix, and returns the diagonal-deleted matrix
@@ -74,6 +72,7 @@ heteroPCA <- function(R, K, T0) {
 #' @param T0 Positive integer. The number of iterations for heteroPCA. Only used when spectral is \code{'heteroPCA'}
 #' @param nstart Positive integer. The number of initial starts in the kmeans function.
 #' @param S0 Vector or \code{NULL}. If is not \code{NULL}, used to permute the labels.
+#' @param clustering_only Boolean. When \code{true}, only clustering is conducted.
 #' @return Named list. The list is made of:
 #' \itemize{
 #' \item \code{U} --- Numeric matrix. Estimation of the left singular matrix.
@@ -194,3 +193,7 @@ perm <- function(x, p, K) {
   }
   return(x_perm)
 }
+
+#library(roxygen2)
+#roxygenise()
+
