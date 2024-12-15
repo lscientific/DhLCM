@@ -12,12 +12,12 @@ Load the R package by running
 ## Simulation experiments
 - Simulation codes are located in `inst/simulation`
 - Each file corresponds to a part of simulation experiments, and can be run individually.
->- `clustering.R` generates Figure 2
->- `hypothesis_testing.R` generates Figure 4, Figure S.3, Table 1
->- `svd_hetero_compare.R` generates Figure 3, Figure S.5
->- `MLE.R` generates Figure S.1, Figure S.2
->- `assumption3.R` generates Figure S.6
->- `condition_number.R` generates Table S.1
+>- `clustering.R` conducts clustering analysis on simulated data and generates Figure 2
+>- `hypothesis_testing.R` verifies the proposed method in terms of hypothesis testing and generates Figure 4, Figure S.3, Table 1
+>- `svd_hetero_compare.R` compares SVD versus HeteroPCA and generates Figure 3, Figure S.5
+>- `MLE.R` compares the proposed method, the marginal maximum likelihood (MML) method and the joint maximum likelihood (JML) method, and generates Figure S.1, Figure S.2
+>- `assumption3.R` verifies Assumption 3 and generates Figure S.6
+>- `condition_number.R` checks the proposed method's robustness to the condition number and generates Table S.1
 
 
 ## Three real data applications
