@@ -54,29 +54,33 @@ heteroPCA <- function(R, K, T0) {
 #'
 #' @param R Numeric matrix. Data matrix.
 #' @param K Positive integer. The number of top eigenvectors/left singular vectors to be extracted.
-#' @param spectral Character. One of \code{"heteroPCA"} and \code{"SVD"}. 
-#'        Specifies the method to be used to obtain the top \code{K} eigenvectors/left singular vectors. 
+#' @param spectral Numeric matrix or character. One of data matrix, \code{"heteroPCA"} and \code{"SVD"}. 
+#'        If is a matrix, it is treated as U. Otherwise needs to be a string that 
+#'        specifies the method to be used to obtain the top \code{K} 
+#'        eigenvectors/left singular vectors. 
 #'        \code{"heteroPCA"} implements the heteroPCA method. 
 #'        \code{"SVD"} performs ordinary singular vector decomposition.
-#' @param norm Character. One of \code{"L2"}, \code{"L1"}, \code{"SCORE"}, and \code{"NA"}. 
+#' @param norm Character or NULL. One of \code{"L2"}, \code{"L1"}, \code{"SCORE"}, and \code{NULL}. 
 #'        Specifies the method to be used for normalization on the eigenvectors/left singular vectors. 
 #'        \code{"L2"} performs L2 normalization. 
 #'        \code{"L1"} performs L1 normalization.
 #'        \code{"SCORE"} performs SCORE normalization.
 #'        \code{"NA"} does not perform normalization.
-#' @param dist Character. One of \code{"Bernoulli"}, \code{"Binomial"}, and \code{"Poisson"}. 
+#' @param dist Character. One of \code{"Bern"}, \code{"Binom"}, and \code{"Pois"}. 
 #'        Specifies the distribution of the ground truth model.
-#'        \code{"Bernoulli"} assumes the Bernoulli distribution.
-#'        \code{"Binomial"} assumes the Binomial distribution.
-#'        \code{"Poisson"} assumes the Poisson distribution.
-#' @param T0 Positive integer. The number of iterations for heteroPCA.
+#'        \code{"Bern"} assumes the Bernoulli distribution.
+#'        \code{"Binom"} assumes the Binomial distribution.
+#'        \code{"Pois"} assumes the Poisson distribution.
+#' @param T0 Positive integer. The number of iterations for heteroPCA. Only used when spectral is \code{'heteroPCA'}
 #' @param nstart Positive integer. The number of initial starts in the kmeans function.
+#' @param S0 Vector or \code{NULL}. If is not \code{NULL}, used to permute the labels.
 #' @return Named list. The list is made of:
 #' \itemize{
+#' \item \code{U} --- Numeric matrix. Estimation of the left singular matrix.
 #' \item \code{T_hat} --- Numeric matrix. Estimation of the \eqn{\Theta}{Theta} matrix.
+#' \item \code{sigma2_hat} --- Numeric vector (>=0). Asymptotic variance for each element of \code{T_hat}.
 #' \item \code{S_hat} --- Numeric vector. Clustered membership for each subject.
 #' \item \code{Z_hat} --- Numeric matrix. Clustered membership for each subject in binary matrix form.
-#' \item \code{sigma2_hat} --- Numeric vector (>=0). Asymptotic variance for each element of \code{T_hat}.
 #' }
 #' @export
 DhLCM <- function(R, K, spectral='heteroPCA', norm='L2', dist='Bern', 
@@ -177,8 +181,7 @@ DhLCM <- function(R, K, spectral='heteroPCA', norm='L2', dist='Bern',
     }
   }
   
-  return(list(U=U, T_hat=T_hat, sigma2_hat=sigma2_hat, 
-              S_hat=S_hat, Z_hat=Z_hat, centers=centers))
+  return(list(U=U, T_hat=T_hat, sigma2_hat=sigma2_hat, S_hat=S_hat, Z_hat=Z_hat))
 }
 
 
