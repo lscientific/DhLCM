@@ -7,7 +7,9 @@
 Load the R package by running
 ```library(DhLCM)```
 - ```heteroPCA```: this function performs the HeteroPCA algorithm proposed in [Zhang et al., 2015](https://arxiv.org/abs/1810.08316).
+>- Use `?heteroPCA` for more details
 - ```DhLCM```: this function performs kmeans clustering on the top ```K``` eigenvectors/left singular vectors of the data matrix, and estimates the DhLCM model parameters.
+>- Use `?heteroPCA` for more details
 
 ## Simulation experiments
 - Simulation codes are located in `inst/simulation`
