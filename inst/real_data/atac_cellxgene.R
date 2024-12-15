@@ -46,7 +46,7 @@ cell_types <- cell_types[chosen]
 # check maximum value
 print(max(as.vector(R))) # 212
 # check sparsity
-print(mean(R != 0)) # 0.268
+print(mean(R != 0)) 
 
 N <- nrow(R)
 J <- ncol(R)
@@ -68,8 +68,7 @@ p_atac <- ggplot(U_data, aes(x=X1, y=X2, color = Type, alpha=0.8)) + scale_alpha
   scale_colour_manual(values=c('#e26b57','#377EC2', '#F2A778', '#F5CB1D', '#c19883')) + 
   guides(color = guide_legend(nrow = 2))
 p_atac
-# ggsave("inst/extdata/figures/atac_2d.pdf", width=7, height = 6.5)
-# this figure corresponds to the middle figure in Figure 1 in the paper
+# this figure corresponds to the second figure in Figure 1 in the paper
 
 
 U_data <- data.frame(U_hetero[, 1:5], Type=as.factor(cell_types))
@@ -82,7 +81,6 @@ ggpairs(U_data, aes(colour = Type, alpha=0.8), legend = 1, columns = 1:5,
         axis.text=element_blank(), axis.line=element_blank()) + scale_alpha(guide = 'none') + 
   scale_fill_manual(values=c('#e26b57','#377EC2', '#F2A778', '#F5CB1D', '#c19883')) +
   scale_colour_manual(values=c('#e26b57','#377EC2', '#F2A778', '#F5CB1D', '#c19883'))
-# ggsave("inst/extdata/figures/atac_pairs.png", width=6.5, height=5)
 # this figure corresponds to Figure S.8 in the supplementary Material
 
 
@@ -120,37 +118,37 @@ head(S0)
 set.seed(1234)
 
 # heteroPCA w/ L2 normalization
-res1 <- DhLCM(R, K=5, spectral='heteroPCA', norm='L2', dist='Pois', 
-              T0=20, nstart=100, S0=S0, clustering_only=T)
+res1 <- DhLCM(R, K=5, spectral=U_hetero, norm='L2', dist='Pois', 
+              T0=20, nstart=100, S0=S0, clustering_only=F)
 cat("Classification error =", mean(res1$S_hat != S0), "\n") 
 cat("Rand index =", rand.index(res1$S_hat, S0), "\n") 
 
 # svd w/ L2 normalization
-res3 <- DhLCM(R, K=5, spectral='SVD', norm='L2', dist='Pois', 
+res3 <- DhLCM(R, K=5, spectral=U, norm='L2', dist='Pois', 
               T0=20, nstart=100, S0=S0, clustering_only=T)
 cat("Classification error =", mean(res3$S_hat != S0), "\n") 
 cat("Rand index =", rand.index(res3$S_hat, S0), "\n") 
 
 # heteroPCA w/ SCORE normalization
-res11 <- DhLCM(R, K=5, spectral='heteroPCA', norm='SCORE', dist='Pois', 
+res11 <- DhLCM(R, K=5, spectral=U_hetero, norm='SCORE', dist='Pois', 
                T0=20, nstart=100, S0=S0, clustering_only=T)
 cat("Classification error =", mean(res11$S_hat != S0), "\n") 
 cat("Rand index =", rand.index(res11$S_hat, S0), "\n") 
 
 # svd w/ SCORE normalization
-res33 <- DhLCM(R, K=5, spectral='SVD', norm='SCORE', dist='Pois', 
+res33 <- DhLCM(R, K=5, spectral=U, norm='SCORE', dist='Pois', 
                T0=20, nstart=100, S0=S0, clustering_only=T)
 cat("Classification error =", mean(res33$S_hat != S0), "\n") 
 cat("Rand index =", rand.index(res33$S_hat, S0), "\n") 
 
 # heteroPCA + w.o. normalization
-res2 <- DhLCM(R, K=5, spectral='heteroPCA', norm=NULL, dist='Pois', 
+res2 <- DhLCM(R, K=5, spectral=U_hetero, norm=NULL, dist='Pois', 
               T0=20, nstart=100, S0=S0, clustering_only=T)
 cat("Classification error =", mean(res2$S_hat != S0), "\n") 
 cat("Rand index =", rand.index(res2$S_hat, S0), "\n") 
 
 # svd w.o. normalization
-res4 <- DhLCM(R, K=5, spectral='SVD', norm=NULL, dist='Pois', 
+res4 <- DhLCM(R, K=5, spectral=U, norm=NULL, dist='Pois', 
               T0=20, nstart=100, S0=S0, clustering_only=T)
 cat("Classification error =", mean(res4$S_hat != S0), "\n") 
 cat("Rand index =", rand.index(res4$S_hat, S0), "\n") 

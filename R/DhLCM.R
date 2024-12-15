@@ -81,15 +81,21 @@ heteroPCA <- function(R, K, T0) {
 #' @export
 DhLCM <- function(R, K, spectral='heteroPCA', norm='L2', dist='Bern', 
                   T0=20, nstart=10, S0=NULL, clustering_only=F) { 
+  if (!is.matrix(R)) stop("Error: R needs to be an matrix")
   N <- nrow(R)
   J <- ncol(R)
   
-  if (spectral == 'heteroPCA') {
-    U <- heteroPCA(R, K, T0)
+  if (is.matrix(spectral)) { # is spectral is an matrix, use it as U
+    if ((nrow(spectral) != N) | (ncol(spectral) != K)) {
+      stop("Error: spectral matrix dimension incorrect")
+    }
+    U <- spectral
   } else if (spectral == 'SVD') {
     U <- svds(R, k=K)$u
+  } else if (spectral == 'heteroPCA') {
+    U <- heteroPCA(R, K, T0)
   } else {
-    stop("Error: spectral needs to be 'heteroPCA' or 'SVD'")
+    stop("Error: spectral needs to be an NxK matrix or 'heteroPCA' or 'SVD'")
   }
   
   # k-means clustering
