@@ -28,7 +28,7 @@ eigenvectors/left singular vectors.
 \code{"heteroPCA"} implements the heteroPCA method.
 \code{"SVD"} performs ordinary singular vector decomposition.}
 
-\item{norm}{Character or NULL. One of \code{"L2"}, \code{"L1"}, \code{"SCORE"}, and \code{NULL}.
+\item{norm}{Character or \code{NULL}. One of \code{"L2"}, \code{"L1"}, \code{"SCORE"}, and \code{NULL}.
 Specifies the method to be used for normalization on the eigenvectors/left singular vectors.
 \code{"L2"} performs L2 normalization.
 \code{"L1"} performs L1 normalization.
