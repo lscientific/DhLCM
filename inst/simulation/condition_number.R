@@ -1,8 +1,14 @@
+## File Name: condition_number.R
+## File Version: 0.01
+## this file verifies the method's robustness to the condition number
+## Corresponds to Table S.1 
+
+
 library(stats)
 library(combinat)
 library(ordinal)
 library(RcppHungarian)
-library(rARPACK)
+library(RSpectra)
 library(gap)
 library(foreach)
 library(doParallel)
@@ -22,13 +28,14 @@ cat("J =", J, "\n")
 
 set.seed(123)
 
+# ground truth item parameters
 T0 <- matrix(rbeta(J*K, 0.1, 1), J, K)
 T0 <- 2/3 * T0
 svd_res <- svd(T0)
 cn0 <- svd_res$d[1] / svd_res$d[K]
-# change cn in 1, 2.29, 2.975, 3.74, 4.59, 5.62, 6.905
-# so that cn_new is 1.5, 2, 2.5, 3, 3.5, 4, 4.5
 
+# manually change cn to 1, 2.29, 2.975, 3.74, 4.59, 5.62, 6.905
+# so that the new condition number cn_new is 1.5, 2, 2.5, 3, 3.5, 4, 4.5
 cn <- 6.905
 r <- cn / cn0
 
@@ -68,7 +75,7 @@ j_chosen <- idx - J * (k_chosen - 1)
 myCluster <- makeCluster(detectCores()-1, type = "PSOCK")
 registerDoParallel(myCluster)
 
-results <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'rARPACK')) %dopar% {
+results <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'RSpectra')) %dopar% {
   cat("rep =", rep, "\n")
   R <- matrix(NA, N, J)
   for(i in 1:N) {
@@ -177,7 +184,7 @@ j_chosen <- idx - J * (k_chosen - 1)
 myCluster <- makeCluster(detectCores()-1, type = "PSOCK")
 registerDoParallel(myCluster)
 
-results <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'rARPACK')) %dopar% {
+results <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'RSpectra')) %dopar% {
   R <- matrix(NA, N, J)
   for(i in 1:N) {
     for(j in 1:J) {

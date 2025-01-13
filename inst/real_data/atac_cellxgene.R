@@ -1,3 +1,9 @@
+## File Name: atac_cellxgene.R
+## File Version: 0.01
+## this file conducts real data analysis on the single cell dataset
+## download the single cell data from figshare https://figshare.com/s/9b4d5964af498d167e85
+
+
 library(ggplot2)
 library(GGally)
 library(Seurat)
@@ -175,6 +181,7 @@ for (idx in indices_pos) {
   T_stat <- c(T_stat, T_1)
 }
 
+# FDR
 fdrs <- p.adjust(pvalues, method="BH")
 indices_rej <- which(fdrs < 0.05)
 

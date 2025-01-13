@@ -1,3 +1,7 @@
+## File Name: svd_hetero_compare.R
+## File Version: 0.01
+## this file compares SVD and HeteroPCA and corresponds Figure 3 and Figure S.5
+
 library(parallel)
 library(ggplot2)
 library(ggpubr)
@@ -6,19 +10,19 @@ library(latex2exp)
 # source the defined functions
 source('./R/DhLCM.R')
 
-n_rep <- 100
-J <- 3000
-N <- 500
-K <- 2
+n_rep <- 100 # number of replications
+J <- 3000 # number of items
+N <- 500 # number of respondents
+K <- 2 # number of latent classes
 
-S0 <- c(rep(1, N/2), rep(2, N/2))
+S0 <- c(rep(1, N/2), rep(2, N/2)) # memberships
 theta_1 <- c(rep(0.3, J/2), rep(0.5, J/2))
 theta_2 <- c(rep(0.1, J/2), rep(0.06, J/2))
-T0 <- cbind(theta_1, theta_2)
+T0 <- cbind(theta_1, theta_2) # ground truth item parameters
 
-#### clustering ####
+#### compare clustering: Figure 3 ####
 
-## Bernoulli
+## when data is Bernoulli-distributed 
 f <- function(rep) {
   R0 <- t(matrix(c(rep(theta_1, N/2), rep(theta_2, N/2)), J, N))
   
@@ -60,10 +64,11 @@ f <- function(rep) {
 }
 
 set.seed(1234)
+t1 <- Sys.time()
 results_bernoulli <- mclapply((1:n_rep), f, mc.cores=7)
+print(Sys.time() - t1) # takes about 5 min
 
-
-## Poisson
+## when data is Poisson-distributed 
 f <- function(rep) {
   R0 <- t(matrix(c(rep(theta_1, N/2), rep(theta_2, N/2)), J, N))
   
@@ -105,10 +110,12 @@ f <- function(rep) {
 }
 
 set.seed(123)
+t1 <- Sys.time()
 results_poisson <- mclapply((1:n_rep), f, mc.cores=7)
+print(Sys.time() - t1) # takes about 5 min
 
 
-#### plots clustering ####
+#### plot Figure 3 first two columns: clustering 
 res_array <- array(NA, dim=c(n_rep, 2))
 res_array[, 1] <- sapply(results_poisson, "[[", 1)
 res_array[, 2] <- sapply(results_poisson, "[[", 2)
@@ -128,7 +135,6 @@ p2 <- ggplot(df_res, aes(x = method, y = Freq)) + geom_boxplot() +
   ylab("Clustering Error") + xlab(NULL) + ggtitle('Poisson') +
   theme(axis.text=element_text(size=10), plot.title = element_text(size=12))
 p2
-
 
 res_array <- array(NA, dim=c(n_rep, 2))
 res_array[, 1] <- sapply(results_bernoulli, "[[", 1)
@@ -151,9 +157,9 @@ p4 <- ggplot(df_res, aes(x = method, y = Freq)) + geom_boxplot() +
 p4
 
 
-#### theta estimation ####
+#### compare theta estimation
 
-## Bernoulli
+## when data is Bernoulli-distributed 
 f <- function(rep) {
   R0 <- t(matrix(c(rep(theta_1, N/2), rep(theta_2, N/2)), J, N))
   
@@ -192,7 +198,7 @@ set.seed(123)
 results_theta1 <- mclapply((1:n_rep), f, mc.cores=7)
 
 
-## Poisson
+## when data is Poisson-distributed 
 f <- function(rep) {
   R0 <- t(matrix(c(rep(theta_1, N/2), rep(theta_2, N/2)), J, N))
   
@@ -231,7 +237,7 @@ set.seed(123)
 results_theta2 <- mclapply((1:n_rep), f, mc.cores=7)
 
 
-#### plots theta estimation ####
+#### plot Figure 3 last column: theta estimation
 res_array <- array(NA, dim=c(n_rep, 2))
 res_array[, 1] <- sapply(results_theta1, "[[", 1)
 res_array[, 2] <- sapply(results_theta1, "[[", 2)
@@ -254,13 +260,14 @@ p6
 
 
 ggarrange(p3, p4, p5, p1, p2, p6, ncol=3, nrow=2)
-ggsave("inst/extdata/simulation_figures/svd_hetero_compare.png", width=9, height=5)
+# ggsave("inst/extdata/simulation_figures/svd_hetero_compare.png", width=9, height=5)
 # this figure corresponds to Figure 3 in the paper
 
 
-#### inference ####
+#### compare inference: Figure S.5 ####
 set.seed(12345)
 T0 <- cbind(theta_1, theta_2)
+# we will conduct hypothesis testing on the first two items
 T0[1, ] <- rep(0.5, K)
 T0[2, ] <- c(0.3, 0.7)
 
@@ -284,7 +291,7 @@ max(R0)
 myCluster <- makeCluster(detectCores()-1, type = "PSOCK")
 registerDoParallel(myCluster)
 
-# Bernoulli
+# when data is Bernoulli-distributed 
 results_inf_bern <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'rARPACK')) %dopar% {
   R <- matrix(NA, N, J)
   for(i in 1:N) {
@@ -353,7 +360,7 @@ results_inf_bern <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'rARPACK')
   list(T_1_svd, T_2_svd, T_1_hetero, T_2_hetero)
 }
 
-# Poisson
+# when data is Poisson-distributed 
 results_inf_pois <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'rARPACK')) %dopar% {
   R <- matrix(NA, N, J)
   for(i in 1:N) {
@@ -425,10 +432,10 @@ results_inf_pois <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'rARPACK')
 stopCluster()
 
 
-#### plot inference ####
+#### plot Figure S.5
 # the figures generated below correspond to Figure S.5 in the Supplementary Material
 
-## Bernoulli
+## when data is Bernoulli-distributed 
 T_1_svd <- sapply(results_inf_bern, "[[", 1)
 T_2_svd <- sapply(results_inf_bern, "[[", 2)
 T_1_hetero <- sapply(results_inf_bern, "[[", 3)
@@ -459,7 +466,7 @@ qqunif(pvalues, logscale = F, cex=0.5, xlim=c(0, 1), ylim=c(0, 1), col='black', 
 dev.off()
 
 
-## Poisson
+## when data is Poisson-distributed 
 T_1_svd <- sapply(results_inf_pois, "[[", 1)
 T_2_svd <- sapply(results_inf_pois, "[[", 2)
 T_1_hetero <- sapply(results_inf_pois, "[[", 3)

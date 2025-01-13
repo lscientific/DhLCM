@@ -1,3 +1,9 @@
+## File Name: senate.R
+## File Version: 0.01
+## this file conducts real data analysis on the senate dataset
+## download the senate data from figshare https://figshare.com/s/9b4d5964af498d167e85
+
+
 library(ggplot2)                  
 library(GGally)
 library(fossil)

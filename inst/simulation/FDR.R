@@ -1,3 +1,9 @@
+## File Name: FDR.R
+## File Version: 0.01
+## this file conducts Simulation Study II: Statistical Inference
+## Corresponds to Table 2
+
+
 library(foreach)
 library(doParallel)
 
@@ -9,7 +15,8 @@ K <- 3
 J <- 1000
 ratio <- 5
 N <- floor(J / ratio)
-J_unif <- floor(J/20)
+J_unif <- floor(J/20) 
+# each item in the first J_unif items has identical item parameters
 
 cat("K =", K, "\n")
 cat("N =", N, "\n")
@@ -21,7 +28,7 @@ for (j in 1:J_unif) {
   T0[j, ] <- rep(runif(1, 0.2, 2/3), K)
 }
 
-#### ground truth with degree ####
+#### ground truth model has degree heterogeneity ####
 Omega0 <- runif(N, 0.5, 1.5)
 S0 <- sample(1:K, N, replace=T) # membership
 C0 <- table(S0)
@@ -50,7 +57,7 @@ results <- list()
 for(i_level in 1:4) {
   print(i_level)
   level <- c(0.01, 0.05, 0.1, 0.2)[i_level]
-  results[[i_level]] <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'rARPACK')) %dopar% {
+  results[[i_level]] <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'RSpectra')) %dopar% {
     R <- matrix(NA, N, J)
     for(i in 1:N) {
       for(j in 1:J) {
@@ -70,6 +77,7 @@ for(i_level in 1:4) {
     indices_pos <- which(apply(T_hat, 1, function(x) all(x > 0)))
     len_pos <- length(which(indices_pos %in% 1:J_unif))
     
+    # test statistics
     T_stat <- c()
     for(j in indices_pos) {
       T_1 <- -1
@@ -80,13 +88,18 @@ for(i_level in 1:4) {
       }
       T_stat <- c(T_stat, T_1)
     }
+    
+    # p-values
     pvalues <- c()
     for (t in T_stat) {
       pvalues <- c(pvalues, 1 - (pchisq(t, df=1))^3)
     }
+    
+    # adjust p-values with BH
     fdrs <- p.adjust(pvalues, method="BH")
     fdr <- fdrs[which(indices_pos %in% 1:J_unif)]
     
+    # results
     false_d <- sum(fdr < level)
     true_d <- sum(fdrs[(J_unif+1):length(fdrs)] < level)
     
@@ -99,6 +112,7 @@ for(i_level in 1:4) {
 T2 <- Sys.time()
 print(T2-T1)
 stopCluster(myCluster)
+
 
 #### results
 false = true = fdp = len = type_I = FWER <- rep(NA, 4)

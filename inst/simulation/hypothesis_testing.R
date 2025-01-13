@@ -1,5 +1,11 @@
+## File Name: hypothesis_testing.R
+## File Version: 0.01
+## this file conducts Simulation Study II: hypothesis testing
+## Corresponds to Figures 4 and S.3 and Table 1
+
+
 library(stats)
-library(rARPACK)
+library(RSpectra)
 library(RcppHungarian)
 library(foreach)
 library(doParallel)
@@ -11,7 +17,7 @@ library(gap)
 source('./R/DhLCM.R')
 
 
-#### Bernoulli ####
+#### when the data are Bernoulli-distributed ####
 
 set.seed(123)
 K <- 3 # change K between 3 and 10
@@ -60,7 +66,7 @@ for(ratio in c(10)) {
   
   # replication
   T1 <- Sys.time()
-  results <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'rARPACK')) %dopar% {
+  results <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'RSpectra')) %dopar% {
     R <- matrix(NA, N, J)
     for(i in 1:N) {
       for(j in 1:J) {
@@ -119,7 +125,7 @@ for(ratio in c(10)) {
 stopCluster(myCluster)
 
 
-#### Bernoulli plot ####
+#### Bernoulli data: plot Figure 4 and print Table 1 ####
 # the figures generated below correspond to Figure 4 in the paper
 # the printed values correspond to Table 1 in the paper
 
@@ -180,7 +186,7 @@ for (J in c(500, 1000)) {
 }
 
 
-#### Poisson ####
+#### when the data are Poisson-distributed ####
 set.seed(123)
 K <- 3 # change K between 3 and 10
 J <- 500 # change J here
@@ -227,7 +233,7 @@ for(ratio in c(10)) {
   
   # replication
   T1 <- Sys.time()
-  results <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'rARPACK')) %dopar% {
+  results <- foreach(rep = 1:500, .packages=c('RcppHungarian', 'RSpectra')) %dopar% {
     R <- matrix(NA, N, J)
     for(i in 1:N) {
       for(j in 1:J) {
@@ -286,7 +292,7 @@ for(ratio in c(10)) {
 stopCluster(myCluster)
 
 
-#### Poisson plot ####
+#### Poisson data: plot Figure S.3 ####
 # the figures generated below correspond to Figure S.3 
 # in the Supplementary Material
 

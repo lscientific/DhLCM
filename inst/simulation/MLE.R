@@ -1,8 +1,13 @@
+## File Name: MLE.R
+## File Version: 0.01
+## this file compares JML, MML and the proposed method. 
+## Corresponds to Figures S.1 and S.2
+
 library(foreach)
 library(doParallel)
 library(stats)
 library(RcppHungarian)
-library(rARPACK)
+library(RSpectra)
 library(ggplot2)
 library(ggpubr)
 library(latex2exp)
@@ -20,28 +25,35 @@ cat("K =", K, "\n")
 cat("N =", N, "\n")
 cat("J =", J, "\n")
 
-# setting weak
+# sample ground truth item parameters
 T0 <- matrix(rbeta(J*K, 0.1, 1), J, K)
 T0 <- 2/3 * T0
+
+# sample ground truth degree parameters
 Omega0 <- runif(N, 0.1, 1.5)
 
-S0 <- sample(1:K, N, replace=T) # membership
+# sample membership
+S0 <- sample(1:K, N, replace=T) 
 C0 <- table(S0)
+# one-hot encoding of membership
 Z0 <- matrix(0, N, K)
 for (i in 1:N) {
   Z0[i, S0[i]] <- 1
 }
+
+# number of replications
 n_rep <- 500
 
 
-#### ground truth without degree ####
+#### ground truth model does not have degree heterogeneity ####
+# ground truth response probabilities
 R0 <- Z0 %*% t(T0)
 R0[R0 > 1] <- 1
 
 myCluster <- makeCluster(detectCores()-1, type = "PSOCK")
 registerDoParallel(myCluster)
 T1 <- Sys.time()
-results <- foreach(rep = 1:n_rep, .packages=c('rARPACK', 'poLCA')) %dopar% {
+results <- foreach(rep = 1:n_rep, .packages=c('RSpectra', 'poLCA')) %dopar% {
   R <- matrix(NA, N, J)
   for(i in 1:N) {
     for(j in 1:J) {
@@ -51,7 +63,7 @@ results <- foreach(rep = 1:n_rep, .packages=c('rARPACK', 'poLCA')) %dopar% {
   svd_res <- svd(R, nu=K, nv=K)
   U <- svd_res$u
   
-  #### sprectral ####
+  #### the proposed method ####
   t1 <- Sys.time()
   est_res <- DhLCM(R, K=K, spectral='heteroPCA', norm='L2', dist='Bern', 
                    S0=S0, clustering_only=F)
@@ -95,7 +107,7 @@ stopCluster(myCluster)
 
 
 
-#### plot ####
+#### Figure S.1 plot ####
 err_spectral <- sapply(results, "[[", 1)
 err_jml <- sapply(results, "[[", 2)
 err_mml <- sapply(results, "[[", 3)
@@ -197,7 +209,7 @@ print(T2-T1)
 stopCluster(myCluster)
 
 
-#### plot ####
+#### Figure S.2 plot ####
 err_spectral <- sapply(results, "[[", 1)
 err_jml <- sapply(results, "[[", 2)
 err_mml <- sapply(results, "[[", 3)

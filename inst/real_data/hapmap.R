@@ -1,3 +1,9 @@
+## File Name: hapmap.R
+## File Version: 0.01
+## this file conducts real data analysis on the HapMap3 dataset
+## download the HapMap3 data from figshare https://figshare.com/s/9b4d5964af498d167e85
+
+
 library(ggplot2)                  
 library(GGally)
 library(fossil)

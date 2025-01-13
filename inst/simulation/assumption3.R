@@ -1,8 +1,13 @@
+## File Name: assumption3.R
+## File Version: 0.01
+## this file verifies Assumption 3 and corresponds to Figure S.6
+
+
 library(stats)
 library(combinat)
 library(ordinal)
 library(RcppHungarian)
-library(rARPACK)
+library(RSpectra)
 library(gap)
 library(parallel)
 library(ggplot2)
@@ -26,12 +31,17 @@ for (i in 1:4) {
   N <- J / 5
   
   f <- function(rep) {
+    # sample ground truth item parameters
     T0 <- matrix(rbeta(J*K, 0.1, 1), J, K)
     T0 <- 2/3 * T0
     
+    # sample degree parameters
     Omega0 <- runif(N, 0.5, 1.5)
-    S0 <- sample(1:K, N, replace=T) # membership
+    
+    # sample membership
+    S0 <- sample(1:K, N, replace=T) 
     Z0 <- matrix(0, N, K)
+    # one-hot encoding for membership
     for (i in 1:N) Z0[i, S0[i]] <- 1
     
     W <- rep(NA, K)
@@ -94,5 +104,5 @@ ggplot(df_res, aes(x = J, y = Freq, fill=Perturbation)) + geom_boxplot() +
   ylab(TeX("Max Abs Error of $\\Theta$")) + xlab(NULL) + xlab('J') +
   scale_fill_manual(values=c("#bae1e8", '#e26b57'))
 
-ggsave("inst/extdata/simulation_figures/assumption3_bern.png", width = 5, height=3.5)
+# ggsave("inst/extdata/simulation_figures/assumption3_bern.png", width = 5, height=3.5)
 # this figure corresponds to Figure S.6 in the Supplementary Material
