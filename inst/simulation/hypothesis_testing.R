@@ -24,7 +24,7 @@ K <- 3 # change K between 3 and 10
 J <- 1000 # change J here
 cat("K =", K, "\n")
 
-myCluster <- makeCluster(detectCores()-1, type = "PSOCK", outfile="./output_bern.log")
+myCluster <- makeCluster(detectCores()-1, type = "PSOCK")
 registerDoParallel(myCluster)
 
 for(ratio in c(10)) {
