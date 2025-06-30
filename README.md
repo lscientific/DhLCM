@@ -1,5 +1,8 @@
 # Degree-heterogeneous Latent Class Analysis
 
+Please cite the following paper when using this repo.
+- Lyu, Z., Chen, L., & Gu, Y. (2025). Degree-heterogeneous Latent Class Analysis for High-dimensional Discrete Data. Journal of the American Statistical Association, (just-accepted), 1-25.
+
 ## How to Install
 ```devtools::install_github("lscientific/DhLCM")```
 
